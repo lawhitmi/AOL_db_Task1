@@ -1,7 +1,7 @@
 Task1Notes.txt
-datasrc/
+datasrc/US.txt
 .vscode/
-__pycache__
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
