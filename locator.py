@@ -52,7 +52,7 @@ for i in range(len(stateKeywords)):
                 'term6':'%'+stateKeywords[i][1].lower()+'%',\
                 'term7':'%'+stateKeywords[i][1].title()+'%'}
 
-    query = "SELECT ANONIDDIM.ID, irsQuery.query FROM\
+    query = "SELECT ANONIDDIM.ID, irsQuery.query, TIMEDIM.[month], TIMEDIM.[day of the week] FROM\
             (SELECT QUERYDIM.QUERY as query, FACTS.ANONID as anonid\
             FROM FACTS\
             INNER JOIN QUERYDIM ON QUERYDIM.ID = FACTS.QUERYID\
@@ -61,9 +61,12 @@ for i in range(len(stateKeywords)):
             OR QUERYDIM.QUERY LIKE '% irs %' \
             OR QUERYDIM.QUERY LIKE '% dmv %' \
             OR QUERYDIM.QUERY LIKE '% DOT %'\
+            OR QUERYDIM.QUERY LIKE 'irs %' \
+            OR QUERYDIM.QUERY LIKE '%tax%' \
             OR QUERYDIM.QUERY LIKE '% weather %'\
             OR QUERYDIM.QUERY LIKE '%weather %') as irsQuery\
-            JOIN ANONIDDIM ON irsQUERY.anonid = ANONIDDIM.ANONID"
+            JOIN ANONIDDIM ON irsQuery.anonid = ANONIDDIM.ANONID"
+    
     for j in range(len(searchTerms)):
         if j==0:
             query = query+" WHERE irsQuery.query LIKE {term"+str(j)+"}"
