@@ -1,7 +1,9 @@
 from exaDBconn import genDBCursor
 import json
 
+
 def wrapStringsinDict (s):
+    #NOT USED
     """ s: dict containing search strings
     Returns a dict with the values wrapped in SQL wildcards '%' """
     result={}
@@ -22,7 +24,7 @@ def getStateInfo():
     """Returns a list of tuples with (STATE_ABBR, STATE_NAME) pairs"""
     curs = genDBCursor()
     states = curs.execute("SELECT STATE_ABBR, STATE_NAME \
-                            FROM USSTATES;")
+                            FROM STATES;")
     stateKeywords =[]
     for row in states:
         stateKeywords.append((row[0],row[1]))
@@ -43,16 +45,15 @@ for i in range(len(stateKeywords)):
         continue
 
     # Build up search terms dict for use in query
-    searchTerms = {'term0':stateKeywords[i][0]+' %',\
+    searchTerms = {'term0':stateKeywords[i][0].upper()+' %',\
                 'term1':"% "+stateKeywords[i][0].lower()+' %',\
-                'term2':"% "+stateKeywords[i][0]+' %', \
-                'term3':stateKeywords[i][0].lower()+' %',\
-                'term4':"% "+stateKeywords[i][0], \
+                'term2':"% "+stateKeywords[i][0].upper()+' %', \
+                'term4':"% "+stateKeywords[i][0].upper(), \
                 'term5':'%'+stateKeywords[i][1]+'%',\
                 'term6':'%'+stateKeywords[i][1].lower()+'%',\
                 'term7':'%'+stateKeywords[i][1].title()+'%'}
 
-    query = "SELECT ANONIDDIM.ID, irsQuery.query, TIMEDIM.[month], TIMEDIM.[day of the week] FROM\
+    query = "SELECT FACTS.ANONID, irsQuery.query, TIMEDIM.[month], TIMEDIM.[day of the week] FROM\
             (SELECT QUERYDIM.QUERY as query, FACTS.ANONID as anonid\
             FROM FACTS\
             INNER JOIN QUERYDIM ON QUERYDIM.ID = FACTS.QUERYID\
@@ -63,9 +64,8 @@ for i in range(len(stateKeywords)):
             OR QUERYDIM.QUERY LIKE '% DOT %'\
             OR QUERYDIM.QUERY LIKE 'irs %' \
             OR QUERYDIM.QUERY LIKE '%tax%' \
-            OR QUERYDIM.QUERY LIKE '% weather %'\
-            OR QUERYDIM.QUERY LIKE '%weather %') as irsQuery\
-            JOIN ANONIDDIM ON irsQuery.anonid = ANONIDDIM.ANONID"
+            OR QUERYDIM.QUERY LIKE '% elementary school %'\
+            OR QUERYDIM.QUERY LIKE '% middle school %') as irsQuery"
     
     for j in range(len(searchTerms)):
         if j==0:
