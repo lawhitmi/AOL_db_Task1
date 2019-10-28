@@ -2,9 +2,8 @@ import csv
 from exaDBconn import genDBCursor
 import sys
 
-
 def getStateInfo():
-    """Returns a list of tuples with (STATE_ABBR, STATE_NAME) pairs"""
+    """Returns a list of tuples with (STATE_ID, STATE_ABBR, STATE_NAME)"""
     curs = genDBCursor()
     states = curs.execute("SELECT ID, STATE_ABBR, STATE_NAME \
                             FROM STATES;")
@@ -44,6 +43,7 @@ def createUSGEOtable():
 
 
 def createSTATEStable():
+    """Creates STATES table and populates the table with data from file"""
     print('Connecting to database...')
     cur = genDBCursor()
     print('Creating Table...')
@@ -73,6 +73,7 @@ def createSTATEStable():
         cur.execute(insertQuery,valDict)
 
 def addLocToQUERYDIM():
+    """Adds column to QUERYDIM and populates it with STATE_ID from QUERY"""
     states = getStateInfo()
     print('Connecting to database...')
     cur = genDBCursor()
@@ -116,7 +117,7 @@ def addLocToQUERYDIM():
         # Run Query
         results = cur.execute(query,searchTerms)
 
-def addLocToFACTS():
+def addLocToANONIDDIM():
     #NOT YET IMPLEMENTED
     print('Connecting to database...')
     cur = genDBCursor()
