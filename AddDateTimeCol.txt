@@ -43,7 +43,7 @@ ORDER BY 1;
     31	grosse point blank	2006-03-24 03:32:09.0	2006-03-24 03:32:09.0
     
 ## Show all queries for a given domain and their time since original search query
-SELECT userSession.ANONID, userSession.QUERY, userSession.STARTTIME, TIMEDIM.DATETIME as queryTime, SECONDS_BETWEEN(TIMEDIM.DATETIME, userSession.starttime), URLDIM.THISDOMAIN
+SELECT userSession.ID, userSession.QUERY, userSession.STARTTIME, TIMEDIM.DATETIME as queryTime, SECONDS_BETWEEN(TIMEDIM.DATETIME, userSession.starttime), URLDIM.THISDOMAIN
 FROM FACTS
 JOIN URLDIM on FACTS.URLID = URLDIM.ID
 JOIN QUERYDIM on FACTS.QUERYID = QUERYDIM.ID
