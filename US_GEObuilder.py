@@ -42,7 +42,7 @@ def createUSGEOtable():
                         VALUES({zip},{city},{state},{abbr},{county},{lat},{long},{est});"
             cur.execute(query,params)
 
-#Generate dictionary with distinct states and abbreviations for writing to DB
+
 def createSTATEStable():
     print('Connecting to database...')
     cur = genDBCursor()
@@ -90,12 +90,15 @@ def addLocToQUERYDIM():
         # Build up search terms dict for use in query
         searchTerms = {'ID':states[i][0],\
                     'term0':states[i][1].upper()+' %',\
-                    'term1':"% "+states[i][1].lower()+' %',\
-                    'term2':"% "+states[i][1].upper()+' %', \
-                    'term3':"% "+states[i][1].upper(), \
-                    'term4':'%'+states[i][2]+'%',\
-                    'term5':'%'+states[i][2].lower()+'%',\
-                    'term6':'%'+states[i][2].title()+'%'}
+                    'term1':"% "+states[i][1].upper()+' %',\
+                    'term2':"% "+states[i][1].upper(), \
+                    'term3':'%'+states[i][2]+'%',\
+                    'term4':'%'+states[i][2].lower()+'%',\
+                    'term5':'%'+states[i][2].title()+'%'}
+        if states[i][1] not in ['OK','OH','IN','CO','ME','OR','ID','HI']:
+            searchTerms['term6']="% "+states[i][1].lower()
+            searchTerms['term7']=states[i][1].lower()+' %'
+            searchTerms['term8']="% "+states[i][1].lower()+' %'
 
         query = "UPDATE AOL_SCHEMA.QUERYDIM SET STATE_ID={ID}"
 
@@ -113,6 +116,46 @@ def addLocToQUERYDIM():
         # Run Query
         results = cur.execute(query,searchTerms)
 
+def addLocToFACTS():
+    #NOT YET IMPLEMENTED
+    print('Connecting to database...')
+    cur = genDBCursor()
+
+    query = "SELECT FACTS.ANONID, irsQuery.query, TIMEDIM.[month], TIMEDIM.[day of the week] FROM\
+            (SELECT QUERYDIM.QUERY as query, FACTS.ANONID as anonid\
+            FROM FACTS\
+            INNER JOIN QUERYDIM ON QUERYDIM.ID = FACTS.QUERYID\
+            WHERE QUERYDIM.QUERY LIKE '%1040%' \
+            OR QUERYDIM.QUERY LIKE '%tax forms%' \
+            OR QUERYDIM.QUERY LIKE '% irs %' \
+            OR QUERYDIM.QUERY LIKE '% dmv %' \
+            OR QUERYDIM.QUERY LIKE '% DOT %'\
+            OR QUERYDIM.QUERY LIKE 'irs %' \
+            OR QUERYDIM.QUERY LIKE '%tax%' \
+            OR QUERYDIM.QUERY LIKE '% elementary school %'\
+            OR QUERYDIM.QUERY LIKE '% middle school %') as irsQuery"
+
+def addDATETIMEtoTIMEDIM():
+    print('Connecting to database...')
+    cur = genDBCursor()
+    print('Adding DATETIME column...')
+    addCol = "ALTER TABLE TIMEDIM ADD datetime TIMESTAMP;"
+    cur.execute(addCol)
+    print('Populating DATETIME column...')
+    updCol = "UPDATE TIMEDIM \
+                SET TIMEDIM.DATETIME = newVals.datetime \
+                FROM (SELECT \
+                TIMEDIM.ID, \
+                to_timestamp( CONCAT(TIMEDIM.[year],'-', \
+                TIMEDIM.[month],'-', \
+                TIMEDIM.[day of the month],' ', \
+                TIMEDIM.[hour],':', \
+                TIMEDIM.[minute],':', \
+                TIMEDIM.[second]), 'YYYY-MONTH-DD HH24:MI:SS' \
+                ) as datetime \
+            FROM TIMEDIM) as newVals \
+            JOIN TIMEDIM on newVals.ID = TIMEDIM.ID;"
+    cur.execute(updCol)
 
 
 if __name__ == "__main__":
@@ -122,8 +165,11 @@ if __name__ == "__main__":
         createSTATEStable()
     elif sys.argv[1] == 'QUERYLOC':
         addLocToQUERYDIM()
+    elif sys.argv[1] == 'DATETIME':
+        addDATETIMEtoTIMEDIM()
     elif sys.argv[1] == 'ALL':
         createUSGEOtable()
         createSTATEStable()
         addLocToQUERYDIM()
+        addDATETIMEtoTIMEDIM()
     
