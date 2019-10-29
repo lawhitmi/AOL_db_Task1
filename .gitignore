@@ -1,7 +1,10 @@
-Task1Notes.txt
+tableBuilder.sql
+archive/
 datasrc/
 .vscode/
 BusIntvenv.bat
+Notes/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -107,3 +110,4 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+tableBuilder.sql

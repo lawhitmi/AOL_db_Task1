@@ -118,18 +118,26 @@ inner join
 on ANONIDDIM.ANONID = t1.USERS;
 
 UPDATE ANONIDDIM
-SET ANONIDDIM.STATE_ID = 2
+SET ANONIDDIM.STATE_ID = t.stateID
 FROM ANONIDDIM
 inner join
-
 (
-    SELECT DISTINCT FACTS.ANONID 'USERS'
-        FROM FACTS 
-        INNER JOIN (select QUERYDIM.ID 'ID_QUERY',QUERYDIM.STATE_ID
-                    from QUERYDIM 
-                    inner join STATES on STATES.ID = QUERYDIM.STATE_ID
-                    WHERE query like '%dmv%' and STATE_ID = 2) t on t.ID_QUERY = FACTS.QUERYID) t1
-on ANONIDDIM.ANONID = t1.USERS;
+    SELECT FACTS.ANONID as ANONID, min(QUERYDIM.STATE_ID) as stateID  FROM
+            FACTS
+            JOIN QUERYDIM on QUERYDIM.ID = FACTS.QUERYID
+            JOIN STATES on STATES.ID=QUERYDIM.STATE_ID
+            WHERE QUERYDIM.QUERY LIKE '%1040%' 
+                        OR QUERYDIM.QUERY LIKE '%tax forms%' 
+                        OR QUERYDIM.QUERY LIKE '% irs %' 
+                        OR QUERYDIM.QUERY LIKE '% dmv %' 
+                        OR QUERYDIM.QUERY LIKE '% DOT %'
+                        OR QUERYDIM.QUERY LIKE 'irs %' 
+                        OR QUERYDIM.QUERY LIKE '%tax%' 
+                        OR QUERYDIM.QUERY LIKE '% elementary school %'
+                        OR QUERYDIM.QUERY LIKE '% middle school %'
+            GROUP BY FACTS.ANONID
+            HAVING COUNT(DISTINCT STATES.STATE_ABBR) = 1
+            ORDER BY 1) t on ANONIDDIM.ID = t.ANONID;
 
 UPDATE ANONIDDIM
 SET ANONIDDIM.STATE_ID = 3
