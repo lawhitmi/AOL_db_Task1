@@ -1,3 +1,4 @@
+import cur as cur
 import pyexasol as pe
 
 def genDBCursor():
@@ -36,39 +37,39 @@ def InsertInto():
     UsrInf = UserInfo()
     print('Connecting to database...')
     cur = genDBCursor()
-    #print('Creating Table')
+    print('Creating Table')
 
-    # SQL = "CREATE TABLE UserCountState_Stg( \
-    #             UserId  DECIMAL(18, 0),\
-    #             Count   DECIMAL(18, 0)\
-    #         );"
-    #
-    # cur.execute(SQL)
-    #
-    # print('Done Creating table')
-    #
-    # print('Inserting Data')
-    #
-    # for i in range(len(UsrInf)):
-    #
-    #     searchTerms = { 'User': UsrInf[i][0], \
-    #                     'Count': UsrInf[i][1] \
-    #                     }
-    #
-    #     queryBld = f"INSERT INTO UserCountState_Stg VALUES ({searchTerms['User']},{searchTerms['Count']})"
-    #
-    #     cur.execute(queryBld)
-    #
-    # print('Done Data')
-    #
-    # SQL2 = "CREATE TABLE FinalUser_Stg( \
-    #             Count  DECIMAL(18, 0),\
-    #             UserId   DECIMAL(18, 0),\
-    #             States varchar(10) \
-    #         );"
-    #
-    # cur.execute(SQL2)
-    #
+    SQL = "CREATE TABLE UserCountState_Stg( \
+                 UserId  DECIMAL(18, 0),\
+                 Count   DECIMAL(18, 0)\
+             );"
+
+    cur.execute(SQL)
+
+    print('Done Creating table')
+
+    print('Inserting Data')
+
+    for i in range(len(UsrInf)):
+
+         searchTerms = { 'User': UsrInf[i][0], \
+                         'Count': UsrInf[i][1] \
+                         }
+
+         queryBld = f"INSERT INTO UserCountState_Stg VALUES ({searchTerms['User']},{searchTerms['Count']})"
+
+         cur.execute(queryBld)
+
+    print('Done Data')
+
+    SQL2 = "CREATE TABLE FinalUser_Stg( \
+                 Count  DECIMAL(18, 0),\
+                 UserId   DECIMAL(18, 0),\
+                 States varchar(10) \
+             );"
+
+    cur.execute(SQL2)
+
 
     SQL3 = "select USERID, COUNT\
             from AOL_SCHEMA.USERCOUNTSTATE_STG;"
@@ -131,14 +132,23 @@ def InsertInto():
         for row in smt2:
             final.append((row[0], row[1], row[2]))
 
-    print(final[0])
 
+        for n in range(len(final)):
 
-    queryIns = "INSERT INTO FinalUser_Stg VALUES ("+ final[0]+ "," +final[1]+ ","+final[2]+")"
+            Terms =   { 'cnt': final[n][0], \
+                        'usr': final[n][1], \
+                        'st': final[n][2] \
+                            }
 
-    print(queryIns)
+            print( Terms['cnt'])
+            print( Terms['usr'])
+            print( Terms['st'])
 
-    cur.execute(queryIns)
+            queryIns = f"INSERT INTO FinalUser_Stg VALUES ("+ str(Terms['cnt'])+ "," +str(Terms['usr'])+ ","+ "'" +str(Terms['st'])+ "'" +")"
+
+            print(queryIns)
+
+            cur.execute(queryIns)
 
     print("si llega hasta aca funciono")
 
