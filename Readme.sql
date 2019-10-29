@@ -104,7 +104,7 @@ update QUERYDIM set STATE_ID =51 where QUERY like '%wyoming%';
 -- then update the users first for DMV.
 
 UPDATE ANONIDDIM
-SET ANONIDDIM.STATE_ID = 1
+SET ANONIDDIM.STATE_ID = i
 FROM ANONIDDIM
 inner join
 
@@ -114,7 +114,7 @@ inner join
         INNER JOIN (select QUERYDIM.ID 'ID_QUERY',QUERYDIM.STATE_ID
                     from QUERYDIM 
                     inner join STATES on STATES.ID = QUERYDIM.STATE_ID
-                    WHERE query like '%dmv%' and STATE_ID = 1) t on t.ID_QUERY = FACTS.QUERYID) t1
+                    WHERE query like '%dmv%'  and STATE_ID = i) t on t.ID_QUERY = FACTS.QUERYID) t1
 on ANONIDDIM.ANONID = t1.USERS;
 
 UPDATE ANONIDDIM

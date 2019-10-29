@@ -72,6 +72,7 @@ def createSTATEStable():
                         VALUES({abbr},{name})"
         cur.execute(insertQuery,valDict)
 
+#Need to make this generate one long string to execute
 def addLocToQUERYDIM():
     """Adds column to QUERYDIM and populates it with STATE_ID from QUERY"""
     states = getStateInfo()
@@ -81,46 +82,51 @@ def addLocToQUERYDIM():
     print('Adding column to QUERYDIM...')
     addCol = "ALTER TABLE AOL_SCHEMA.QUERYDIM ADD COLUMN STATE_ID DECIMAL(18,0);"
     cur.execute(addCol)
-
-    for i in range(len(states)): 
     
-        # Check for blanks in states
-        if not bool(states[i][1]) or not bool(states[i][2]):
-            continue
+    with open('tableBuilder.sql', 'a') as the_file:
+        
+        for i in range(len(states)): 
+        
+            # Check for blanks in states
+            if not bool(states[i][1]) or not bool(states[i][2]):
+                continue
 
-        # Build up search terms dict for use in query
-        searchTerms = {'ID':states[i][0],\
-                    'term0':states[i][1].upper()+' %',\
-                    'term1':"% "+states[i][1].upper()+' %',\
-                    'term2':"% "+states[i][1].upper(), \
-                    'term3':'%'+states[i][2]+'%',\
-                    'term4':'%'+states[i][2].lower()+'%',\
-                    'term5':'%'+states[i][2].title()+'%'}
-        if states[i][1] not in ['OK','OH','IN','CO','ME','OR','ID','HI']:
-            searchTerms['term6']="% "+states[i][1].lower()
-            searchTerms['term7']=states[i][1].lower()+' %'
-            searchTerms['term8']="% "+states[i][1].lower()+' %'
+            # Build up search terms dict for use in query
+            searchTerms = {'ID':states[i][0],\
+                        'term0':states[i][1].upper()+' %',\
+                        'term1':"% "+states[i][1].upper()+' %',\
+                        'term2':"% "+states[i][1].upper(), \
+                        'term3':'%'+states[i][2]+'%',\
+                        'term4':'%'+states[i][2].lower()+'%',\
+                        'term5':'%'+states[i][2].title()+'%'}
+            if states[i][1] not in ['OK','OH','IN','CO','ME','OR','ID','HI']:
+                searchTerms['term6']="% "+states[i][1].lower()
+                searchTerms['term7']=states[i][1].lower()+' %'
+                searchTerms['term8']="% "+states[i][1].lower()+' %'
 
-        query = "UPDATE AOL_SCHEMA.QUERYDIM SET STATE_ID={ID}"
+            queryBld = f"UPDATE AOL_SCHEMA.QUERYDIM SET STATE_ID={searchTerms['ID']}"
 
-        for j in range(len(searchTerms)-1): #-1 to account for ID in first slot
-            if j==0:
-                query = query+" WHERE QUERY LIKE {term"+str(j)+"}"
-            elif j==(len(searchTerms)-1):
-                query =query+" OR QUERY LIKE {term"+str(j)+"};"
-            else:    
-                query = query+" OR QUERY LIKE {term"+str(j)+"}"
+            for j in range(len(searchTerms)-1): #-1 to account for ID in first slot
+                if j==0:
+                    queryBld = queryBld+f" WHERE QUERY LIKE '{searchTerms['term'+str(j)]}'"
+                elif j==(len(searchTerms)-2):
+                    queryBld =queryBld+f" OR QUERY LIKE '{searchTerms['term'+str(j)]}';"
+                else:    
+                    queryBld = queryBld+f" OR QUERY LIKE '{searchTerms['term'+str(j)]}'"
 
-        # Provide some status output     
-        print(query)
-        print('searching: '+ str(states[i]))
-        # Run Query
-        results = cur.execute(query,searchTerms)
+            the_file.write(queryBld + '\n')
+    the_file.close()
+    # Run Query
+    #results = cur.execute(query)
 
 def addLocToANONIDDIM():
     #NOT YET IMPLEMENTED
     print('Connecting to database...')
     cur = genDBCursor()
+
+    print('Adding column to ANONIDDIM...')
+    addCol = "ALTER TABLE AOL_SCHEMA.ANONIDDIM ADD COLUMN STATE_ID DECIMAL(18,0);"
+    cur.execute(addCol)
 
     query = "SELECT FACTS.ANONID, irsQuery.query, TIMEDIM.[month], TIMEDIM.[day of the week] FROM\
             (SELECT QUERYDIM.QUERY as query, FACTS.ANONID as anonid\
