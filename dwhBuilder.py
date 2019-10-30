@@ -30,7 +30,7 @@ with open('tableBuilder.sql', 'a') as the_file:
             STATE_ABBR VARCHAR(4) UTF8 \
         );\n")
     the_file.write("ALTER TABLE AOL_SCHEMA.QUERYDIM ADD COLUMN STATE_ID DECIMAL(18,0);\n")
-    the_file.write("ALTER TABLE AOL_SCHEMA.ANONIDDIM ADD COLUMN STATE_ID DECIMAL(18,0);\n")
+    the_file.write("ALTER TABLE AOL_SCHEMA.FACTS ADD COLUMN STATE_ID DECIMAL(18,0);\n")
     the_file.write("ALTER TABLE TIMEDIM ADD datetime TIMESTAMP;\n")
 
     the_file.write("UPDATE TIMEDIM \
@@ -98,9 +98,9 @@ with open('tableBuilder.sql', 'a') as the_file:
 
             the_file.write(queryBld + '\n')
 
-    the_file.write("UPDATE ANONIDDIM\
-                    SET ANONIDDIM.STATE_ID = t.stateID\
-                    FROM ANONIDDIM\
+    the_file.write("UPDATE FACTS\
+                    SET FACTS.STATE_ID = t.stateID\
+                    FROM FACTS\
                     inner join\
                     (\
                         SELECT FACTS.ANONID as ANONID, min(QUERYDIM.STATE_ID) as stateID  FROM\
@@ -116,6 +116,7 @@ with open('tableBuilder.sql', 'a') as the_file:
                                             OR QUERYDIM.QUERY LIKE '%tax%' \
                                             OR QUERYDIM.QUERY LIKE '% elementary school %'\
                                             OR QUERYDIM.QUERY LIKE '% middle school %'\
+                                            OR QUERYDIM.QUERY LIKE '% high school %'\
                                 GROUP BY FACTS.ANONID\
                                 HAVING COUNT(DISTINCT STATES.STATE_ABBR) = 1\
-                                ORDER BY 1) t on ANONIDDIM.ID = t.ANONID;")
+                                ORDER BY 1) t on FACTS.ANONID = t.ANONID;")
