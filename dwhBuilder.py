@@ -14,20 +14,24 @@ def getStateInfo():
     return stateKeywords
 
 with open('tableBuilder.sql', 'a') as the_file:
-    the_file.write("CREATE TABLE LOCATION ( \
-        ID DECIMAL(18,0), \
-        COUNTRY  VARCHAR(4) UTF8, \
-        ZIPCODE  DECIMAL(10,0), \
-        CITY   VARCHAR(100) UTF8, \
-        STATE_NAME   VARCHAR(100) UTF8, \
-        STATE_ABBR   VARCHAR(4) UTF8, \
-        LAT DECIMAL(10,5), \
-        LONG DECIMAL(10,5) \
-        );\n")
+    # the_file.write("CREATE TABLE LOCATION ( \
+    #     ID DECIMAL(18,0), \
+    #     COUNTRY  VARCHAR(4) UTF8, \
+    #     ZIPCODE  DECIMAL(10,0), \
+    #     CITY   VARCHAR(100) UTF8, \
+    #     STATE_NAME   VARCHAR(100) UTF8, \
+    #     STATE_ABBR   VARCHAR(4) UTF8, \
+    #     LAT DECIMAL(10,5), \
+    #     LONG DECIMAL(10,5) \
+    #     );\n")
     the_file.write("CREATE TABLE STATES ( \
             ID        DECIMAL(18,0), \
             STATE_NAME VARCHAR(100) UTF8, \
-            STATE_ABBR VARCHAR(4) UTF8 \
+            STATE_ABBR VARCHAR(4) UTF8,\
+            REGION VARCHAR(4),\
+            CAPITAL VARCHAR(100),\
+            LAT DECIMAL(18,0),\
+            LONG DECIMAL(18,0)\
         );\n")
     the_file.write("ALTER TABLE AOL_SCHEMA.QUERYDIM ADD COLUMN STATE_ID DECIMAL(18,0);\n")
     the_file.write("ALTER TABLE AOL_SCHEMA.FACTS ADD COLUMN STATE_ID DECIMAL(18,0);\n")
@@ -48,13 +52,13 @@ with open('tableBuilder.sql', 'a') as the_file:
             JOIN TIMEDIM on newVals.ID = TIMEDIM.ID;\n")
     
     
-    the_file.write(f"""IMPORT INTO AOL_SCHEMA.LOCATION FROM LOCAL CSV FILE '{currPath}/Import1.csv' \
-                ENCODING = 'UTF-8' \
-                ROW SEPARATOR = 'CRLF' \
-                COLUMN SEPARATOR = ',' \
-                COLUMN DELIMITER = '"' \
-                SKIP = 0 \
-                REJECT LIMIT 0;\n""")
+    # the_file.write(f"""IMPORT INTO AOL_SCHEMA.LOCATION FROM LOCAL CSV FILE '{currPath}/Import1.csv' \
+    #             ENCODING = 'UTF-8' \
+    #             ROW SEPARATOR = 'CRLF' \
+    #             COLUMN SEPARATOR = ',' \
+    #             COLUMN DELIMITER = '"' \
+    #             SKIP = 0 \
+    #             REJECT LIMIT 0;\n""")
 
 
     the_file.write(f"""IMPORT INTO AOL_SCHEMA.STATES FROM LOCAL CSV FILE '{currPath}/Import2.csv' \

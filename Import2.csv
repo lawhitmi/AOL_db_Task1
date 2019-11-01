@@ -1,51 +1,51 @@
-1,Alabama,AL
-2,Alaska,AK
-3,Arizona,AZ
-4,Arkansas,AR
-5,California,CA
-6,Colorado,CO
-7,Connecticut,CT
-8,Delaware,DE
-9,District of Columbia,DC
-10,Florida,FL
-11,Georgia,GA
-12,Hawaii,HI
-13,Idaho,ID
-14,Illinois,IL
-15,Indiana,IN
-16,Iowa,IA
-17,Kansas,KS
-18,Kentucky,KY
-19,Louisiana,LA
-20,Maine,ME
-21,Maryland,MD
-22,Massachusetts,MA
-23,Michigan,MI
-24,Minnesota,MN
-25,Mississippi,MS
-26,Missouri,MO
-27,Montana,MT
-28,Nebraska,NE
-29,Nevada,NV
-30,New Hampshire,NH
-31,New Jersey,NJ
-32,New Mexico,NM
-33,New York,NY
-34,North Carolina,NC
-35,North Dakota,ND
-36,Ohio,OH
-37,Oklahoma,OK
-38,Oregon,OR
-39,Pennsylvania,PA
-40,Rhode Island,RI
-41,South Carolina,SC
-42,South Dakota,SD
-43,Tennessee,TN
-44,Texas,TX
-45,Utah,UT
-46,Vermont,VT
-47,Virginia,VA
-48,Washington,WA
-49,West Virginia,WV
-50,Wisconsin,WI
-51,Wyoming,WY
+1,Alabama,AL,SO,Montgomery,32.361538,-86.279118
+2,Alaska,AK,WE,Juneau,58.301935,-134.41974
+3,Arizona,AZ,WE,Phoenix,33.448457,-112.073844
+4,Arkansas,AR,SO,Little Rock,34.736009,-92.331122
+5,California,CA,WE,Sacramento,38.555605,-121.468926
+6,Colorado,CO,WE,Denver,39.7391667,-104.984167
+7,Connecticut,CT,NE,Hartford,41.767,-72.677
+8,Delaware,DE,SO,Dover,39.161921,-75.526755
+9,District of Columbia,DC,SO,,38.913,-77.013
+10,Florida,FL,SO,Tallahassee,30.4518,-84.27277
+11,Georgia,GA,SO,Atlanta,33.76,-84.39
+12,Hawaii,HI,WE,Honolulu,21.30895,-157.826182
+13,Idaho,ID,WE,Boise,43.613739,-116.237651
+14,Illinois,IL,MW,Springfield,39.78325,-89.650373
+15,Indiana,IN,MW,Indianapolis,39.790942,-86.147685
+16,Iowa,IA,MW,Des Moines,41.590939,-93.620866
+17,Kansas,KS,MW,Topeka,39.04,-95.69
+18,Kentucky,KY,SO,Frankfort,38.197274,-84.86311
+19,Louisiana,LA,SO,Baton Rouge,30.45809,-91.140229
+20,Maine,ME,NE,Augusta,44.323535,-69.765261
+21,Maryland,MD,SO,Annapolis,38.972945,-76.501157
+22,Massachusetts,MA,NE,Boston,42.2352,-71.0275
+23,Michigan,MI,MW,Lansing,42.7335,-84.5467
+24,Minnesota,MN,MW,St. Paul,44.95,-93.094
+25,Mississippi,MS,SO,Jackson,32.32,-90.207
+26,Missouri,MO,MW,Jefferson City,38.572954,-92.189283
+27,Montana,MT,WE,Helena,46.595805,-112.027031
+28,Nebraska,NE,MW,Lincoln,40.809868,-96.675345
+29,Nevada,NV,WE,Carson City,39.160949,-119.753877
+30,New Hampshire,NH,NE,Concord,43.220093,-71.549127
+31,New Jersey,NJ,NE,Trenton,40.221741,-74.756138
+32,New Mexico,NM,WE,Santa Fe,35.667231,-105.964575
+33,New York,NY,NE,Albany,42.659829,-73.781339
+34,North Carolina,NC,SO,Raleigh,35.771,-78.638
+35,North Dakota,ND,MW,Bismarck,48.813343,-100.779004
+36,Ohio,OH,MW,Columbus,39.962245,-83.000647
+37,Oklahoma,OK,SO,Oklahoma City,35.482309,-97.534994
+38,Oregon,OR,WE,Salem,44.931109,-123.029159
+39,Pennsylvania,PA,NE,Harrisburg,40.269789,-76.875613
+40,Rhode Island,RI,NE,Providence,41.82355,-71.422132
+41,South Carolina,SC,SO,Columbia,34,-81.035
+42,South Dakota,SD,MW,Pierre,44.367966,-100.336378
+43,Tennessee,TN,SO,Nashville,36.165,-86.784
+44,Texas,TX,SO,Austin,30.266667,-97.75
+45,Utah,UT,WE,Salt Lake City,40.7547,-111.892622
+46,Vermont,VT,NE,Montpelier,44.26639,-72.57194
+47,Virginia,VA,SO,Richmond,37.54,-77.46
+48,Washington,WA,WE,Olympia,47.042418,-122.893077
+49,West Virginia,WV,SO,Charleston,38.349497,-81.633294
+50,Wisconsin,WI,MW,Madison,43.074722,-89.384444
+51,Wyoming,WY,WE,Cheyenne,41.145548,-104.802042
