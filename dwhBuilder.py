@@ -112,7 +112,6 @@ with open('tableBuilder.sql', 'a') as the_file:
                                 JOIN QUERYDIM on QUERYDIM.ID = FACTS.QUERYID\
                                 JOIN STATES on STATES.ID=QUERYDIM.STATE_ID\
                                 WHERE QUERYDIM.QUERY LIKE '%1040%' \
-                                            OR QUERYDIM.QUERY LIKE '%tax forms%' \
                                             OR QUERYDIM.QUERY LIKE '% irs %' \
                                             OR QUERYDIM.QUERY LIKE '% dmv %' \
                                             OR QUERYDIM.QUERY LIKE '% DOT %'\
@@ -121,6 +120,11 @@ with open('tableBuilder.sql', 'a') as the_file:
                                             OR QUERYDIM.QUERY LIKE '% elementary school %'\
                                             OR QUERYDIM.QUERY LIKE '% middle school %'\
                                             OR QUERYDIM.QUERY LIKE '% high school %'\
+                                            OR QUERYDIM.QUERY LIKE '% library %'\
+                                            OR QUERYDIM.QUERY LIKE '% lotto %'\
+                                            OR QUERYDIM.QUERY LIKE '% classifieds %'\
+                                            OR QUERYDIM.QUERY LIKE '%lottery%'\
+                                            OR QUERYDIM.QUERY LIKE '% sex offender%'\
                                 GROUP BY FACTS.ANONID\
                                 HAVING COUNT(DISTINCT STATES.STATE_ABBR) = 1\
                                 ORDER BY 1) t on FACTS.ANONID = t.ANONID;")
