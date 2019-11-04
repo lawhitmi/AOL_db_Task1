@@ -26,8 +26,8 @@ alter table AOL_SCHEMA.FACTS drop column STATE_ID;
 ------
 
 
--- Show all queries for a given domain and their time since original search query -- is not working correctly
---because is given more than one result per query
+-- Show all queries for a given domain and their time since original search query --
+-- 
 
 
 SELECT userSession.ID
@@ -141,6 +141,39 @@ as userSession ON userSession.ID = FACTS.ANONID
 and userSession.QUERY = QUERYDIM.QUERY 
 order by 2) as t1;
 
+
+------- avg between url 
+
+SELECT t1.*,
+		ABS((t1.diff - lag(t1.diff) over (partition by t1.Query order by t1.UserId))) as DataPoint
+FROM (
+SELECT
+	userSession.ID as UserId
+	, userSession.QUERY as Query
+	, URLDIM.THISDOMAIN as ThisDomain
+	, SECONDS_BETWEEN(TIMEDIM.DATETIME, userSession.starttime) as diff
+FROM FACTS
+JOIN URLDIM on FACTS.URLID = URLDIM.ID
+JOIN QUERYDIM on FACTS.QUERYID = QUERYDIM.ID
+JOIN TIMEDIM on FACTS.TIMEID = TIMEDIM.ID
+JOIN (SELECT FACTS.ANONID as ID
+	, QUERYDIM.QUERY as QUERY
+	, min(TIMEDIM.DATETIME) as startTime
+	, max(TIMEDIM.DATETIME) as endTime 
+	FROM FACTS
+	JOIN QUERYDIM on FACTS.QUERYID=QUERYDIM.ID
+	JOIN TIMEDIM on FACTS.TIMEID=TIMEDIM.ID
+	GROUP BY FACTS.ANONID,
+		EXTRACT(MONTH FROM TIMEDIM.DATETIME),
+		EXTRACT(DAY FROM TIMEDIM.DATETIME),
+		QUERYDIM.QUERY
+	ORDER BY 1) as userSession
+ON to_char(userSession.STARTTIME, 'DD-MM-YYYY') = to_char(TIMEDIM.DATETIME, 'DD-MM-YYYY')
+where userSession.ID = FACTS.ANONID 
+and userSession.QUERY = QUERYDIM.QUERY
+and URLDIM.THISDOMAIN like '%ebay%'
+order by 1,2,3
+) as t1;
 
 
 
