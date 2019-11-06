@@ -147,33 +147,196 @@ order by 2) as t1;
 SELECT t1.*,
 		ABS((t1.diff - lag(t1.diff) over (partition by t1.Query order by t1.UserId))) as DataPoint
 FROM (
-SELECT
-	userSession.ID as UserId
-	, userSession.QUERY as Query
-	, URLDIM.THISDOMAIN as ThisDomain
-	, SECONDS_BETWEEN(TIMEDIM.DATETIME, userSession.starttime) as diff
+		SELECT
+			userSession.ID as UserId
+			, userSession.QUERY as Query
+			, URLDIM.THISDOMAIN as ThisDomain
+			, SECONDS_BETWEEN(TIMEDIM.DATETIME, userSession.starttime) as diff
+		FROM FACTS
+		JOIN URLDIM on FACTS.URLID = URLDIM.ID
+		JOIN QUERYDIM on FACTS.QUERYID = QUERYDIM.ID
+		JOIN TIMEDIM on FACTS.TIMEID = TIMEDIM.ID
+		JOIN (
+
+				SELECT FACTS.ANONID as ID
+				, QUERYDIM.QUERY as QUERY
+				, min(TIMEDIM.DATETIME) as startTime
+				, max(TIMEDIM.DATETIME) as endTime
+				FROM FACTS
+				JOIN QUERYDIM on FACTS.QUERYID=QUERYDIM.ID
+				JOIN TIMEDIM on FACTS.TIMEID=TIMEDIM.ID
+				GROUP BY FACTS.ANONID,
+					EXTRACT(MONTH FROM TIMEDIM.DATETIME),
+					EXTRACT(DAY FROM TIMEDIM.DATETIME),
+					QUERYDIM.QUERY
+				ORDER BY 1) as userSession
+		ON to_char(userSession.STARTTIME, 'DD-MM-YYYY') = to_char(TIMEDIM.DATETIME, 'DD-MM-YYYY')
+		where userSession.ID = FACTS.ANONID
+		and userSession.QUERY = QUERYDIM.QUERY
+		and URLDIM.THISDOMAIN like '%ebay%'
+		group by userSession.ID as UserId
+			, userSession.QUERY as Query
+			, URLDIM.THISDOMAIN as ThisDomain
+		having SECONDS_BETWEEN(TIMEDIM.DATETIME, userSession.starttime) > 0
+		order by 1,2,3
+		) as t1;
+
+
+--------- Query the DATAPOINTS
+
+SELECT t1.userid as userid,
+		t1.queryid,
+		t1.timeid,
+		t1.UrlId,
+		ABS((t1.diff - lead(t1.diff) over (partition by t1.Query order by t1.UserId))) as DataPoint
+	FROM (
+			SELECT
+						userSession.ID as UserId,
+						URLDIM.THISDOMAIN as ThisDomain,
+						FACTS.QUERYID as queryid,
+						FACTS.TIMEID as timeid,
+						FACTS.ANONID as AnonId,
+						FACTS.URLID as UrlId,
+						userSession.QUERY as Query,
+						SECONDS_BETWEEN(TIMEDIM.DATETIME, userSession.starttime) as diff
+					FROM FACTS
+					JOIN URLDIM on FACTS.URLID = URLDIM.ID
+					JOIN QUERYDIM on FACTS.QUERYID = QUERYDIM.ID
+					JOIN TIMEDIM on FACTS.TIMEID = TIMEDIM.ID
+					JOIN (SELECT FACTS.ANONID as ID
+						, QUERYDIM.QUERY as QUERY
+						, min(TIMEDIM.DATETIME) as startTime
+						, max(TIMEDIM.DATETIME) as endTime
+						FROM FACTS
+						JOIN QUERYDIM on FACTS.QUERYID=QUERYDIM.ID
+						JOIN TIMEDIM on FACTS.TIMEID=TIMEDIM.ID
+						--WHERE FACTS.ANONID = 417617
+						GROUP BY FACTS.ANONID,
+							EXTRACT(MONTH FROM TIMEDIM.DATETIME),
+							EXTRACT(DAY FROM TIMEDIM.DATETIME),
+							QUERYDIM.QUERY
+						ORDER BY 1) as userSession
+					ON to_char(userSession.STARTTIME, 'DD-MM-YYYY') = to_char(TIMEDIM.DATETIME, 'DD-MM-YYYY')
+					where userSession.ID = FACTS.ANONID
+					and userSession.QUERY = QUERYDIM.QUERY
+					order by 1,2,3
+		) as t1;
+
+--------- Create Stage Table
+
+CREATE TABLE STGTABLE (
+	UserID decimal(18,0),
+	QueryID decimal(18,0),
+	TimeID decimal(18,0),
+	urlID decimal(18,0),
+	DataPoint decimal(18,0) );
+
+---------
+
+ALTER TABLE AOL_SCHEMA.FACTS ADD COLUMN ID DECIMAL(18,0);
+
+
+UPDATE FACTS
+SET FACTS.DATAPOINT = t.datapoint
 FROM FACTS
-JOIN URLDIM on FACTS.URLID = URLDIM.ID
-JOIN QUERYDIM on FACTS.QUERYID = QUERYDIM.ID
-JOIN TIMEDIM on FACTS.TIMEID = TIMEDIM.ID
-JOIN (SELECT FACTS.ANONID as ID
-	, QUERYDIM.QUERY as QUERY
-	, min(TIMEDIM.DATETIME) as startTime
-	, max(TIMEDIM.DATETIME) as endTime 
-	FROM FACTS
-	JOIN QUERYDIM on FACTS.QUERYID=QUERYDIM.ID
-	JOIN TIMEDIM on FACTS.TIMEID=TIMEDIM.ID
-	GROUP BY FACTS.ANONID,
-		EXTRACT(MONTH FROM TIMEDIM.DATETIME),
-		EXTRACT(DAY FROM TIMEDIM.DATETIME),
-		QUERYDIM.QUERY
-	ORDER BY 1) as userSession
-ON to_char(userSession.STARTTIME, 'DD-MM-YYYY') = to_char(TIMEDIM.DATETIME, 'DD-MM-YYYY')
-where userSession.ID = FACTS.ANONID 
-and userSession.QUERY = QUERYDIM.QUERY
-and URLDIM.THISDOMAIN like '%ebay%'
-order by 1,2,3
-) as t1;
+inner join
+(
+select
+	DISTINCT
+	STGTABLE.USERID as usr,
+	STGTABLE.QUERYID as qry,
+	STGTABLE.TIMEID as tmid,
+	STGTABLE.URLID as link,
+	STGTABLE.DATAPOINT as datapoint
+from STGTABLE
+where STGTABLE.UserID = 5240
+ORDER BY 1) t on FACTS.ANONID = t.usr
+AND FACTS.QUERYID = t.qry
+AND FACTS.TIMEID = t.tmid
+AND FACTS.URLID = t.link;
+
+
+------------
+
+INSERT INTO AOL_SCHEMA.STGTABLE
+SELECT t1.userid as userid,
+		t1.queryid,
+		t1.timeid,
+		t1.UrlId,
+		ABS((t1.diff - lead(t1.diff) over (partition by t1.Query order by t1.UserId))) as DataPoint
+	FROM (
+			SELECT
+						userSession.ID as UserId,
+						URLDIM.THISDOMAIN as ThisDomain,
+						FACTS.QUERYID as queryid,
+						FACTS.TIMEID as timeid,
+						FACTS.ANONID as AnonId,
+						FACTS.URLID as UrlId,
+						userSession.QUERY as Query,
+						SECONDS_BETWEEN(TIMEDIM.DATETIME, userSession.starttime) as diff
+					FROM FACTS
+					JOIN URLDIM on FACTS.URLID = URLDIM.ID
+					JOIN QUERYDIM on FACTS.QUERYID = QUERYDIM.ID
+					JOIN TIMEDIM on FACTS.TIMEID = TIMEDIM.ID
+					JOIN (SELECT FACTS.ANONID as ID
+						, QUERYDIM.QUERY as QUERY
+						, min(TIMEDIM.DATETIME) as startTime
+						, max(TIMEDIM.DATETIME) as endTime
+						FROM FACTS
+						JOIN QUERYDIM on FACTS.QUERYID=QUERYDIM.ID
+						JOIN TIMEDIM on FACTS.TIMEID=TIMEDIM.ID
+						--WHERE FACTS.ANONID = 417617
+						GROUP BY FACTS.ANONID,
+							EXTRACT(MONTH FROM TIMEDIM.DATETIME),
+							EXTRACT(DAY FROM TIMEDIM.DATETIME),
+							QUERYDIM.QUERY
+						ORDER BY 1) as userSession
+					ON to_char(userSession.STARTTIME, 'DD-MM-YYYY') = to_char(TIMEDIM.DATETIME, 'DD-MM-YYYY')
+					where userSession.ID = FACTS.ANONID
+					and userSession.QUERY = QUERYDIM.QUERY
+					order by 1,2,3
+		) as t1;
+
+---------------------
+
+SELECT t1.*,
+		ABS((t1.diff - lead(t1.diff) over (partition by t1.Query order by t1.UserId))) as DataPoint
+FROM (
+		SELECT
+			userSession.ID as UserId
+			, userSession.QUERY as Query
+			, URLDIM.THISDOMAIN as ThisDomain
+			, SECONDS_BETWEEN(TIMEDIM.DATETIME, userSession.starttime) as diff
+		FROM FACTS
+		JOIN URLDIM on FACTS.URLID = URLDIM.ID
+		JOIN QUERYDIM on FACTS.QUERYID = QUERYDIM.ID
+		JOIN TIMEDIM on FACTS.TIMEID = TIMEDIM.ID
+		JOIN (
+
+				SELECT FACTS.ANONID as ID
+				, QUERYDIM.QUERY as QUERY
+				, min(TIMEDIM.DATETIME) as startTime
+				, max(TIMEDIM.DATETIME) as endTime
+				FROM FACTS
+				JOIN QUERYDIM on FACTS.QUERYID=QUERYDIM.ID
+				JOIN TIMEDIM on FACTS.TIMEID=TIMEDIM.ID
+				GROUP BY FACTS.ANONID,
+					EXTRACT(MONTH FROM TIMEDIM.DATETIME),
+					EXTRACT(DAY FROM TIMEDIM.DATETIME),
+					QUERYDIM.QUERY
+				ORDER BY 1) as userSession
+		ON to_char(userSession.STARTTIME, 'DD-MM-YYYY') = to_char(TIMEDIM.DATETIME, 'DD-MM-YYYY')
+		where userSession.ID = FACTS.ANONID
+		and userSession.QUERY = QUERYDIM.QUERY
+		and URLDIM.THISDOMAIN like '%ebay%'
+		and SECONDS_BETWEEN(TIMEDIM.DATETIME, userSession.starttime) > 0
+		order by 1,2,3
+		) as t1;
+
+-----------
+
+
+
 
 
 
