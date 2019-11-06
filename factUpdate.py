@@ -1,6 +1,6 @@
 from exaDBconn import genDBCursor
 
-cur = genDBcursor()
+cur = genDBCursor()
 
 query = 'SELECT QUERYID, TIMEID, ANONID, URLID, IRANK, CLICK, STATE_ID, DATAPOINT FROM FACTS ORDER BY QUERYID, TIMEID, ANONID, URLID ;'
 
